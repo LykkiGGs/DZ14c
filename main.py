@@ -4,6 +4,10 @@ from bs4 import BeautifulSoup
 
 app = FastAPI()
 
+@app.get("/")
+def root():
+    return {"status": "ok"}
+    
 @app.get("/get-sum")
 def get_sum():
     url = "https://www.leagueofgraphs.com/summoner/eune/Vertigo-3110#championsData-all"
