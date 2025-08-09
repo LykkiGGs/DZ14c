@@ -4,10 +4,12 @@ from bs4 import BeautifulSoup
 
 app = FastAPI()
 
+
 @app.get("/")
 def root():
     return {"status": "ok"}
-    
+
+
 @app.get("/get-sum")
 def get_sum():
     url = "https://www.leagueofgraphs.com/summoner/eune/Vertigo-3110#championsData-all"
@@ -25,9 +27,10 @@ def get_sum():
 
     soup = BeautifulSoup(response.text, "html.parser")
 
+    # Use keys as they appear in href URLs (with + and -)
     players = {
         "villain+arc-777": None,
-        "hot+korean+ad-001": None  # example second player, change as needed
+        "hot+korean+ad-001": None
     }
 
     td_tags = soup.find_all("td", attrs={"data-sort-value": True})
@@ -40,6 +43,7 @@ def get_sum():
                 if player in href and players[player] is None:
                     try:
                         val = float(td["data-sort-value"])
+                        # Accept only integers >= 1
                         if val >= 1 and val.is_integer():
                             players[player] = val
                     except ValueError:
@@ -53,6 +57,6 @@ def get_sum():
 
     return {
         "villain_arc_777": int(players["villain+arc-777"]),
-        "hot_korean_ad_001": int(players["hot_korean_ad_001"]),
+        "hot_korean_ad_001": int(players["hot+korean+ad-001"]),
         "sum": int(total)
     }
