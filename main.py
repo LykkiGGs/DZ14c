@@ -1,8 +1,15 @@
 from fastapi import FastAPI
 import requests
 from bs4 import BeautifulSoup
+import time
 
 app = FastAPI()
+
+cache = {
+    "data": None,
+    "timestamp": 0
+}
+CACHE_EXPIRY_SECONDS = 600  # 10 minutes
 
 
 @app.get("/")
@@ -12,6 +19,11 @@ def root():
 
 @app.get("/get-sum")
 def get_sum():
+    now = time.time()
+    # Check cache validity
+    if cache["data"] is not None and (now - cache["timestamp"] < CACHE_EXPIRY_SECONDS):
+        return cache["data"]
+
     url = "https://www.leagueofgraphs.com/summoner/eune/Vertigo-3110#championsData-all"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -27,7 +39,6 @@ def get_sum():
 
     soup = BeautifulSoup(response.text, "html.parser")
 
-    # Use keys as they appear in href URLs (with + and -)
     players = {
         "villain+arc-777": None,
         "hot+korean+ad-001": None
@@ -43,7 +54,6 @@ def get_sum():
                 if player in href and players[player] is None:
                     try:
                         val = float(td["data-sort-value"])
-                        # Accept only integers >= 1
                         if val >= 1 and val.is_integer():
                             players[player] = val
                     except ValueError:
@@ -55,8 +65,14 @@ def get_sum():
 
     total = sum(players.values())
 
-    return {
+    result = {
         "villain_arc_777": int(players["villain+arc-777"]),
         "hot_korean_ad_001": int(players["hot+korean+ad-001"]),
         "sum": int(total)
     }
+
+    # Update cache
+    cache["data"] = result
+    cache["timestamp"] = now
+
+    return result
