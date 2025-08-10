@@ -26,7 +26,7 @@ cache = {
     "data": None,
     "timestamp": 0
 }
-CACHE_EXPIRY_SECONDS = 600  # 10 minutes
+CACHE_EXPIRY_SECONDS = 3600  # 10 minutes
 
 
 @app.get("/")
@@ -93,3 +93,4 @@ def get_sum():
     cache["timestamp"] = now
 
     return result
+
