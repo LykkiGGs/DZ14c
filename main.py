@@ -1,9 +1,26 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import requests
 from bs4 import BeautifulSoup
 import time
 
 app = FastAPI()
+
+# Allowed origins for CORS (local dev + your domain)
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+    "http://127.0.0.1",
+    "https://christianandvero.xyz"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 cache = {
     "data": None,
